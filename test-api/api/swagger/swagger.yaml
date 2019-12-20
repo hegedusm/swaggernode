@@ -1,0 +1,351 @@
+swagger: "2.0"
+info:
+  version: "0.0.1"
+  title: Hello World App
+# during dev, should point to your local machine
+host: localhost:10010
+# basePath prefixes all resource paths 
+basePath: /
+# 
+schemes:
+  # tip: remove http to make production-grade
+  - http
+  - https
+# format of bodies a client can send (Content-Type)
+consumes:
+  - application/json
+# format of the responses to the client (Accepts)
+produces:
+  - application/json
+paths:
+  /products:
+    x-swagger-router-controller: products
+    get:
+      summary: List all products
+      operationId: searchProducts
+      description: |
+        Returns all available products in the system
+      produces:
+      - application/json
+      responses:
+        200:
+          description: Returns every product
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+    post:
+      summary: Adds a product
+      operationId: addProduct
+      description: Adds an item to the system
+      consumes:
+      - application/json
+      produces:
+      - text/plain
+      parameters:
+      - in: body
+        name: product
+        description: Product to add
+        schema:
+          $ref: '#/definitions/Product'
+      responses:
+        200:
+          description: Item created
+          schema:
+            type: string
+          
+        
+  /products/{id}:
+    parameters:
+      - in: path
+        type: integer
+        required: true
+        name: id
+        description: id of product
+    x-swagger-router-controller: products
+    get:
+      summary: Get product
+      operationId: getProduct
+      description: |
+        Returns product for id
+      produces:
+      - application/json
+      responses:
+        200:
+          description: Returns given id product
+          schema:
+            $ref: '#/definitions/Product'
+        404:
+          description: No product with given id
+          schema:
+            type: string
+    delete:
+      operationId: deleteProduct
+      summary: Deletes product
+      description: Deletes product with given id
+      produces:
+      - text/plain
+      responses: 
+        200:
+          description: Delete succesfull
+          schema:
+            type: string
+        404:
+          description: No product with given id
+          schema:
+            type: string
+  /products/{id}/reviews:
+    parameters:
+      - in: path
+        type: integer
+        required: true
+        name: id
+        description: id of product
+    x-swagger-router-controller: products
+    get:
+      summary: get product reviews
+      operationId: getProductReviews
+      description: |
+        Returns product reviews for product with id
+      produces:
+      - application/json
+      responses:
+        200:
+          description: Returns given id product reviews
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Review'
+        404:
+          description: No product with given id
+          schema:
+            type: string
+  /cities:
+    x-swagger-router-controller: cities
+    get:
+      summary: Get citites
+      operationId: getCitites
+      description: |
+        Returns list of all cities
+      produces:
+      - application/json
+      responses:
+        200:
+          description: Returns list of all citites
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/City'
+        404:
+          description: No citites to return
+          schema:
+            type: string
+    post:
+      summary: Add a city
+      operationId: addCity
+      description: Adds city to the system
+      consumes:
+      - application/json
+      produces:
+      - text/plain
+      parameters:
+      - in: body
+        name: city
+        description: City to add
+        schema:
+          $ref: '#/definitions/City'
+      responses:
+        200:
+          description: City created
+          schema:
+            type: string
+        500:
+          description: Failed to create city
+  /cities/{id}:
+    parameters:
+        - in: path
+          type: integer
+          required: true
+          name: id
+          description: id of city
+    x-swagger-router-controller: cities
+    delete:
+      summary: Deletes city with id
+      operationId: deleteCity
+      description: Deletes city with given id
+      produces:
+      - text/plain
+      responses: 
+        200:
+          description: Delete succesfull
+          schema:
+            type: string
+        404:
+          description: No city with given id
+          schema:
+            type: string
+    put:
+      summary: Inserts or updates a city
+      operationId: upsertCity
+      description: Upserts a city with the given id
+      consumes:
+      - application/json
+      produces:
+      - text/plain
+      parameters:
+      - in: body
+        name: city
+        description: City to upsert
+        schema:
+          $ref: '#/definitions/City'
+      responses:
+        200:
+          description: City created
+          schema:
+            type: string
+        500:
+          description: Failed to create city
+  /users:
+    x-swagger-router-controller: users
+    get:
+      summary: Get users
+      operationId: getUsers
+      description: |
+        Returns list of all users
+      produces:
+      - application/json
+      responses:
+        200:
+          description: Returns list of all users
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Users'
+  /users/{userName}:
+    parameters:
+        - in: path
+          type: string
+          required: true
+          name: userName
+          description: username
+    x-swagger-router-controller: users
+    delete:
+      summary: Deletes user with user name
+      description: Deletes user with given user name
+      operationId: deleteUser
+      produces:
+      - text/plain
+      responses: 
+        200:
+          description: Delete succesfull
+          schema:
+            type: string
+        404:
+          description: No user with given user name
+          schema:
+            type: string
+  /hello:
+    # binds a127 app logic to a route
+    x-swagger-router-controller: hello_world
+    get:
+      description: Returns 'Hello' to the caller
+      # used as the method name of the controller
+      operationId: hello
+      parameters:
+        - name: name
+          in: query
+          description: The name of the person to whom to say hello
+          required: false
+          type: string
+      responses:
+        "200":
+          description: Success
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/HelloWorldResponse"
+        # responses may fall through to errors
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /swagger:
+    x-swagger-pipe: swagger_raw
+# complex objects have schema definitions
+definitions:
+  HelloWorldResponse:
+    required:
+      - message
+    properties:
+      message:
+        type: string
+  ErrorResponse:
+    required:
+      - message
+    properties:
+      message:
+        type: string
+  Product:
+    type: object
+    required:
+    - name
+    - reviews
+    properties:
+      id:
+        type: integer
+        format: int32
+        example: 1
+      name:
+        type: string
+        example: Example product
+      reviews:
+        type: array
+        items:
+          $ref: '#/definitions/Review'
+  Review:
+    type: object
+    required:
+    - text
+    properties:
+      text:
+        type: string
+        example: example review
+  City:
+    type: object
+    required:
+    - name
+    - country
+    - capital
+    - location
+    properties:
+      name:
+        type: string
+        example: Szeged
+      country:
+        type: string
+        example: Hungary
+      capital:
+        type: boolean
+      location:
+        $ref: '#/definitions/Location'
+  Location:
+    type: object
+    required: 
+    - lat
+    - long
+    properties:
+      lat:
+        type: number
+      long:
+        type: number
+  Users:
+    type: object
+    required: 
+    - userName
+    - password
+    properties:
+      userName:
+        type: string
+        example: test
+      password:
+        type: string
+        example: password
